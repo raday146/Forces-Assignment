@@ -3,15 +3,6 @@ import  { ForcesService } from "../service/forces.service.js";
 
 export const ForcesController = {
 
-  async getForces(req: Request, res: Response) {
-    try {
-      const forces = await ForcesService.getAllActiveForces();
-      res.json(forces);
-    } catch (error) {
-      console.error("Error in getForces:", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
-  },
   
   async updateForce(req: Request, res: Response) {
     const id = req.params.id as string;
@@ -45,7 +36,7 @@ export const ForcesController = {
     }
   },
 
-  async getForcesByParent(req: Request, res: Response) {
+  async getForces(req: Request, res: Response) {
     try {
       const { parentId } = req.query;
       

@@ -1,14 +1,16 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import dotenv from "dotenv";
+import { Force } from "./force.entity.js";
 
 dotenv.config();
 
 export const AppDataSource = new DataSource({
   type: "postgres",
   url: process.env.DATABASE_URL!,
+  synchronize:false,
   logging: false,
-  entities: [],
+  entities: [Force],
   subscribers: [],
   migrations: [],
 });

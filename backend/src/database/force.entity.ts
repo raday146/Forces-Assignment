@@ -4,10 +4,10 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 
 @Entity("forces")
 export class Force {
-  @PrimaryGeneratedColumn({ type: "numeric" }) 
+  @PrimaryGeneratedColumn({ type: "integer" })
   id!: number;
 
-  @Column({ type: "numeric", nullable: true })
+  @Column({ type: "integer", nullable: true })
   parent_id!: number | null;
 
   @ManyToOne(() => Force, (force: Force) => force.children, { nullable: true })

@@ -1,6 +1,6 @@
 import { IsNull } from "typeorm";
-import { AppDataSource } from "../database/db.js";
 import { Force } from "../database/force.entity.js";
+import { AppDataSource } from "../database/db.js";
 
 const forceRepository = AppDataSource.getRepository(Force);
 

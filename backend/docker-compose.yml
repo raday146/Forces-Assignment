@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: forces-db-local
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: forces_db
+    ports:
+      - "5432:5432"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend_api
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      - PORT=3000
+      - DATABASE_URL=postgres://postgres:password@db:5432/forces_db
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+
+    volumes:
+      - ./backend:/app
+      - /app/node_modules

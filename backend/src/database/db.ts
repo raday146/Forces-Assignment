@@ -18,9 +18,7 @@ export const AppDataSource = new DataSource({
 export const testDbConnection = async () => {
   try {
     await AppDataSource.initialize();
-    console.log("✅ TypeORM DataSource has been initialized successfully!");
   } catch (error) {
-    console.error("❌ Error during TypeORM DataSource initialization:", error);
     process.exit(1);
   }
 };

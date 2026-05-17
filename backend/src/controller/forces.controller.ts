@@ -49,7 +49,20 @@ export const ForcesController = {
       res.status(500).json({ error: "Internal server error" });
     }
   },
+  async search(req: Request, res: Response) {
+    try {
+      const { q } = req.query;
+      if (!q || typeof q !== "string") {
+        return res.status(400).json({ error: "Search query parameter 'q' is required" });
+      }
 
+      const results = await ForcesService.searchForces(q);
+      return res.json(results);
+    } catch (error) {
+      console.error("Error in controller search:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  },
   async deleteForce(req: Request, res: Response) {
     const id = req.params.id as string;    
     if (typeof id !== 'string') {

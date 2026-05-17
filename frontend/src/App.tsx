@@ -1,122 +1,74 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { SearchBar } from "./components/searchComp";
+import TreeNode from "./components/TreeNode";
+import type { Force, SearchResult } from "./lib/types";
+import  { API_BASE } from "./lib/apis/api";
 
-function App() {
-  const [count, setCount] = useState(0)
+
+
+export default function App() {
+  const [rootForces, setRootForces] = useState<Force[]>([]);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [searching, setSearching] = useState(false);
+
+  useEffect(() => {
+    axios.get(API_BASE)
+      .then((res) => setRootForces(res.data))
+      .catch((err) => console.error("Error loading root units:", err));
+  }, []);
+
+  const handleSearchSubmit = async (query: string) => {
+    setSearching(true);
+    try {
+      const res = await axios.get(`${API_BASE}/search?q=${query}`);
+      setSearchResults(res.data);
+    } catch (err) {
+      console.error("Search failed:", err);
+    } finally {
+      setSearching(false);
+    }
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div style={{ padding: "30px", fontFamily: "Segoe UI, sans-serif", display: "flex", gap: "50px", maxWidth: "1200px", margin: "0 auto" }}>
+      
+      <div style={{ flex: 1, minWidth: "300px" }}>
+        <h2 style={{ borderBottom: "2px solid #333", paddingBottom: "10px" }}>Order of Battle Tree</h2>
+        <div style={{ background: "#f8f9fa", padding: "20px", borderRadius: "8px", border: "1px solid #e3e6ea", minHeight: "400px" }}>
+          {rootForces.length > 0 ? (
+            rootForces.map((node) => <TreeNode key={node.id} node={node} apiBase={API_BASE} />)
+          ) : (
+            <p style={{ color: "#666" }}>Loading military hierarchy...</p>
+          )}
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      </div>
 
-      <div className="ticks"></div>
+      {/* RIGHT COLUMN: Search */}
+      <div style={{ flex: 1, minWidth: "300px" }}>
+        <h2 style={{ borderBottom: "2px solid #333", paddingBottom: "10px" }}>Force Finder</h2>
+        
+        <SearchBar onSearch={handleSearchSubmit} />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          {searching && <p style={{ color: "#666" }}>Scanning hierarchy paths...</p>}
+          
+          {!searching && searchResults.map((result) => (
+            <div key={result.id} style={{ padding: "14px", border: "1px solid #e3e6ea", background: "#ffffff", borderRadius: "6px", boxShadow: "0 2px 4px rgba(0,0,0,0.02)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+                <strong style={{ fontSize: "16px" }}>{result.name}</strong>
+                <span style={{ fontSize: "11px", background: "#e2e3e5", color: "#383d41", padding: "2px 8px", borderRadius: "12px", fontWeight: "bold" }}>
+                  {result.forceType}
+                </span>
+              </div>
+              <div style={{ fontSize: "13px", color: "#0a58ca", background: "#f1f6fe", padding: "8px", borderRadius: "4px", borderLeft: "3px solid #0d6efd" }}>
+                 <strong>Chain:</strong> {result.path.join(" ➔ ")}
+              </div>
+            </div>
+          ))}
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      </div>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    </div>
+  );
 }
-
-export default App

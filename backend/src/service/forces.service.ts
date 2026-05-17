@@ -25,6 +25,46 @@ export const ForcesService = {
       order: { name: "ASC" }
     });
   },
+
+  async searchForces(query: string) {
+   if(!query || typeof query !=="string"){
+    return [];
+   }
+   try {
+      const queryBuilder = AppDataSource.getRepository(Force).createQueryBuilder("forces");
+      type ForceUpgrade = Force & {path_string: string};
+      const searchParam = `%${query}%`;
+
+      const rawResults = await queryBuilder.connection.manager.query(`
+        WITH RECURSIVE Ancestry AS (
+          SELECT id, name, force_type, parent_id, CAST(name AS TEXT) as path_string
+          FROM force
+          WHERE is_deleted = false 
+            AND (name ILIKE :search OR force_type ILIKE :search)
+          UNION ALL
+          SELECT f.id, f.name, f.force_type, f.parent_id, CAST(f.name || ' -> ' || a.path_string AS TEXT)
+          FROM force f
+          INNER JOIN Ancestry a ON f.id = a.parent_id
+          WHERE f.is_deleted = false
+        )
+        SELECT id, name, force_type, parent_id, path_string 
+        FROM Ancestry
+        WHERE name ILIKE :search OR force_type ILIKE :search;
+      `, [searchParam]);
+      return rawResults.map((row: ForceUpgrade) => ({
+        id: row.id,
+        name: row.name,
+        forceType: row.force_type,
+        parentId: row.parent_id,
+        path: row.path_string.split(" -> ")
+      }));
+
+    } catch (error) {
+      console.error("Error inside searchForces execution:", error);
+      throw error;
+    }
+
+  },
   async updateForce(id: string , name: string, forceType: string, parentId: number | null) {
     const force = await forceRepository.findOneBy({ id: Number(id) });
     if (!force) return null;

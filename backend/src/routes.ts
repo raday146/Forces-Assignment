@@ -3,6 +3,7 @@ import  { ForcesController } from "./controller/forces.controller.js";
 
 const router = Router();
 
+router.get("/search", ForcesController.search);
 router.get("/", ForcesController.getForces);
 router.get("/:id", ForcesController.getForceById);
 router.put("/:id", ForcesController.updateForce);
